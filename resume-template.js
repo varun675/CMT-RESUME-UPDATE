@@ -6,10 +6,12 @@ const RESUME_TEMPLATE_SOURCE = `
   <div class="bar"></div>
   <div class="page">
     <aside class="sidebar">
+      {{#if includeLogo}}
       {{#if logoSrc}}
       <img class="logo" src="{{logoSrc}}" alt="CMT logo" crossorigin="anonymous" />
       {{else}}
       <div class="avatar"></div>
+      {{/if}}
       {{/if}}
       <p class="name">{{displayName}}</p>
       <p class="role">{{title}}</p>

@@ -57,6 +57,7 @@ body {
 }
 
 .hint { color: var(--cmt-text-muted); font-size: 12.5px; margin-top: -6px; }
+.or-divider { text-align: center; margin: 16px 0 4px; }
 .redact-notice {
   background: #fff7ed;
   border: 1px solid #fed7aa;
@@ -212,9 +213,17 @@ textarea { resize: vertical; }
   margin: 18px 0 8px 0;
 }
 .resume-doc .sidebar h2:first-of-type { margin-top: 0; }
+.resume-doc .sidebar h2, .resume-doc .main h2 {
+  page-break-after: avoid;
+  break-after: avoid;
+}
 .resume-doc .summary-text { margin: 0; color: var(--cmt-text); }
 .resume-doc .list { margin: 0; padding-left: 16px; }
-.resume-doc .list li { margin-bottom: 6px; }
+.resume-doc .list li {
+  margin-bottom: 6px;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
 .resume-doc .job {
   margin-bottom: 16px;
   page-break-inside: avoid;
@@ -238,7 +247,11 @@ textarea { resize: vertical; }
   margin: 6px 0 0 0;
   padding-left: 16px;
 }
-.resume-doc .job li { margin-bottom: 4px; }
+.resume-doc .job li {
+  margin-bottom: 4px;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
 .resume-doc .skills-section {
   page-break-inside: avoid;
   break-inside: avoid;

@@ -31,6 +31,26 @@ function setStatus(el, message, type) {
   el.className = "status" + (type ? " " + type : "");
 }
 
+// A parsing step that hangs instead of failing (seen with some file
+// formats/libraries) would otherwise leave the UI stuck on "Parsing…"
+// forever with no way out. Cap every parsing step so a stuck promise always
+// surfaces as an error the user can act on.
+function withTimeout(promise, ms, timeoutMessage) {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new Error(timeoutMessage)), ms);
+    promise.then(
+      (value) => {
+        clearTimeout(timer);
+        resolve(value);
+      },
+      (err) => {
+        clearTimeout(timer);
+        reject(err);
+      }
+    );
+  });
+}
+
 function checkImageExists(url) {
   return new Promise((resolve) => {
     const img = new Image();
@@ -66,6 +86,28 @@ function addSkillEntry(entry = {}) {
 document.getElementById("add-experience").addEventListener("click", () => addExperienceEntry());
 document.getElementById("add-skill").addEventListener("click", () => addSkillEntry());
 
+document.getElementById("manual-fill-btn").addEventListener("click", () => {
+  document.getElementById("f-name").value = "";
+  document.getElementById("f-title").value = "";
+  document.getElementById("f-location").value = "";
+  document.getElementById("f-phone").value = "";
+  document.getElementById("f-email").value = "";
+  document.getElementById("f-summary").value = "";
+  document.getElementById("f-education").value = "";
+  document.getElementById("f-certifications").value = "";
+  document.getElementById("f-achievements").value = "";
+
+  experienceList.innerHTML = "";
+  addExperienceEntry();
+
+  skillsList.innerHTML = "";
+  addSkillEntry();
+
+  setStatus(uploadStatus, "Blank form ready — fill in the fields below.", "success");
+  reviewSection.classList.remove("hidden");
+  reviewSection.scrollIntoView({ behavior: "smooth" });
+});
+
 document.getElementById("parse-btn").addEventListener("click", async () => {
   const fileInput = document.getElementById("resume-file");
   if (!fileInput.files.length) {
@@ -80,18 +122,21 @@ document.getElementById("parse-btn").addEventListener("click", async () => {
   setStatus(uploadStatus, useAI && apiKey ? "Parsing with Claude…" : "Parsing…", "");
   let fallbackNotice = "";
   try {
+    const PARSE_TIMEOUT_MS = 20000;
+    const timeoutMsg = "Parsing timed out. Try a different file, or use \"Fill in manually\" instead.";
+
     let data;
     if (useAI && apiKey) {
       try {
-        const text = await extractTextFromFile(file);
-        data = await parseResumeWithAI(text, apiKey);
+        const text = await withTimeout(extractTextFromFile(file), PARSE_TIMEOUT_MS, timeoutMsg);
+        data = await withTimeout(parseResumeWithAI(text, apiKey), PARSE_TIMEOUT_MS, timeoutMsg);
       } catch (aiErr) {
         console.error("AI parsing failed, falling back to heuristic parser:", aiErr);
         fallbackNotice = ` (AI parsing failed: ${aiErr.message} — used basic parsing instead)`;
-        data = await parseResumeFile(file);
+        data = await withTimeout(parseResumeFile(file), PARSE_TIMEOUT_MS, timeoutMsg);
       }
     } else {
-      data = await parseResumeFile(file);
+      data = await withTimeout(parseResumeFile(file), PARSE_TIMEOUT_MS, timeoutMsg);
     }
 
     document.getElementById("f-name").value = data.name || "";
@@ -157,9 +202,10 @@ document.getElementById("generate-btn").addEventListener("click", async () => {
       ...entry,
       displayTitle: [entry.role, entry.project].filter(Boolean).join(" — ") || "Confidential Engagement",
     }));
-    const logoSrc = (await checkImageExists(LOGO_SRC)) ? LOGO_SRC : null;
+    const includeLogo = document.getElementById("include-logo").checked;
+    const logoSrc = includeLogo && (await checkImageExists(LOGO_SRC)) ? LOGO_SRC : null;
 
-    const html = resumeTemplate({ ...resumeData, skillRows, contactLine, displayName, experience, logoSrc });
+    const html = resumeTemplate({ ...resumeData, skillRows, contactLine, displayName, experience, logoSrc, includeLogo });
 
     const host = document.getElementById("resume-render-host");
     host.innerHTML = html;
@@ -187,7 +233,14 @@ document.getElementById("generate-btn").addEventListener("click", async () => {
         image: { type: "jpeg", quality: 0.98 },
         html2canvas: { scale: 2, useCORS: true, backgroundColor: "#ffffff" },
         jsPDF: { unit: "in", format: "a4", orientation: "portrait" },
-        pagebreak: { mode: ["css", "avoid-all"] },
+        // "avoid-all" refuses to slice through *any* block element, so a
+        // list that doesn't fully fit on the current page gets pushed whole
+        // to the next one — leaving its heading stranded with blank space
+        // under it. Plain "css" mode only respects the explicit
+        // page-break-inside/after rules in styles.css, which mark just the
+        // small units (bullets, job entries, headings) that must stay
+        // intact, without dragging whole sections along with them.
+        pagebreak: { mode: ["css"] },
       })
       .from(host.firstElementChild)
       .outputPdf("blob");

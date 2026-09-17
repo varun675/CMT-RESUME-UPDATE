@@ -1,6 +1,6 @@
 # Resume Builder CMT
 
-A static, client-side app: upload a resume (PDF/DOCX), review the extracted fields, and export it in the CMT theme as a PDF. Everything — parsing and PDF generation — runs in the browser; nothing is uploaded to a server.
+A static, client-side app: upload a resume (PDF/DOCX) — or skip the upload and fill in the fields manually — review the extracted fields, and export it in the CMT theme as a PDF. Everything — parsing and PDF generation — runs in the browser; nothing is uploaded to a server.
 
 ## Redaction policy
 
@@ -26,6 +26,18 @@ Check "Use AI parsing (Claude)" and paste an Anthropic API key to have Claude ex
 **Security note**: the key is stored only in your own browser's `localStorage` and is sent directly from your browser to Anthropic's API — it is never committed to this repo or sent anywhere else. That said, GitHub Pages sites are publicly reachable regardless of whether the source repo is private (only GitHub Enterprise Cloud restricts a published Pages site itself), so anyone who finds this app's public URL sees the same static files — they just don't get *your* key, since it's never in those files. Only enable this on a copy of the app you consider fully personal, and be aware the key is visible in your own browser's network tab / devtools while you use it.
 
 If the API call fails (bad key, rate limit, network issue) or the checkbox is left unchecked, parsing falls back to the built-in heuristic parser automatically.
+
+## Filling in manually
+
+Click "Fill in manually (no file)" on the upload screen to skip parsing entirely and open a blank review form. It produces the exact same CMT PDF as the upload flow — useful when you don't have a source file handy or want to build a resume from scratch.
+
+## Word (.doc / .docx) support
+
+Modern `.docx` files are parsed with [mammoth.js](https://github.com/mwilliamson/mammoth.js). Legacy binary `.doc` files (pre-2007 Word format) are a much more involved OLE-based format, and every pure-JS library for reading them assumes a full Node.js runtime — running one through a browser shim was tried and found to hang indefinitely inside the library's own parser under real browser testing, so it isn't offered. Uploading a `.doc` file fails fast with a message asking you to re-save it as `.docx` in Word (File > Save As > Word Document (.docx)) and re-upload, or to use "Fill in manually" instead.
+
+## Optional logo
+
+The "Include company logo on the PDF" checkbox in the review form controls whether `assets/logo.png` (or the placeholder avatar, if that file is missing) appears on the generated PDF. Uncheck it to omit the logo/avatar entirely.
 
 ## Deploying to GitHub Pages
 

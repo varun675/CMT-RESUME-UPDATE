@@ -16,8 +16,8 @@
   <main class="container">
     <section id="upload-section" class="card">
       <h2>1. Upload resume</h2>
-      <p class="hint">Accepts PDF or DOCX.</p>
-      <input type="file" id="resume-file" accept=".pdf,.docx" />
+      <p class="hint">Accepts PDF or DOCX. (Old .doc files aren't supported — save as .docx first, or fill in manually below.)</p>
+      <input type="file" id="resume-file" accept=".pdf,.doc,.docx" />
 
       <label class="checkbox-label">
         <input type="checkbox" id="use-ai-parsing" />
@@ -31,6 +31,9 @@
 
       <button id="parse-btn" class="btn btn-primary">Parse Resume</button>
       <p id="upload-status" class="status"></p>
+
+      <p class="hint or-divider">— or —</p>
+      <button id="manual-fill-btn" class="btn btn-secondary">Fill in manually (no file)</button>
     </section>
 
     <section id="review-section" class="card hidden">
@@ -73,6 +76,11 @@
       <h3>Technical Skills</h3>
       <div id="skills-list"></div>
       <button type="button" id="add-skill" class="btn btn-secondary">+ Add category</button>
+
+      <label class="checkbox-label">
+        <input type="checkbox" id="include-logo" checked />
+        Include company logo on the PDF
+      </label>
 
       <div class="actions">
         <button id="generate-btn" class="btn btn-primary">Generate CMT PDF</button>

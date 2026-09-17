@@ -59,6 +59,20 @@ async function extractTextFromFile(file) {
     return result.value;
   }
 
+  if (file.type === "application/msword" || lower.endsWith(".doc")) {
+    // Legacy binary .doc (pre-2007 Word format, OLE compound-file based) is
+    // a much more involved format than DOCX's ZIP+XML, and every pure-JS
+    // library for it assumes a full Node.js runtime. Loading one through a
+    // browser shim (esm.sh) was tried and tested: it hung indefinitely deep
+    // inside the library's own OLE parser in a real browser (a Node
+    // stream/event-loop assumption the shim can't faithfully emulate), so
+    // it isn't a safe base to build on. Fail fast with a clear next step
+    // instead of leaving the UI stuck on "Parsing…" forever.
+    throw new Error(
+      "Old .doc files (pre-2007 Word format) can't be parsed in the browser. Please re-save it as .docx in Word (File > Save As > Word Document (.docx)) and re-upload, or use \"Fill in manually\" instead."
+    );
+  }
+
   return new TextDecoder("utf-8").decode(buffer);
 }
 
@@ -129,26 +143,30 @@ function parseExperience(lines) {
     current = null;
   };
 
+  const startEntry = (headerText, dates) => {
+    finishCurrent();
+    current = {
+      ...splitHeaderLine(headerText),
+      project: "",
+      dates,
+      bullets: [],
+    };
+    pendingHeader = "";
+  };
+
   for (const line of lines) {
-    if (INLINE_DATE_RE.test(line)) {
-      finishCurrent();
-      const headerText = line.replace(INLINE_DATE_RE, "").trim().replace(/[-–,]\s*$/, "");
-      current = {
-        ...splitHeaderLine(headerText),
-        project: "",
-        dates: line.match(INLINE_DATE_RE)[0].replace(/[()]/g, ""),
-        bullets: [],
-      };
-      pendingHeader = "";
+    const inlineMatch = line.match(INLINE_DATE_RE);
+    if (inlineMatch) {
+      // Header and date are usually on the same line ("Role | Employer (Mar
+      // 2022 - Present)"), but DOCX extraction puts each paragraph on its
+      // own line, so a resume typed with the date on its own line ends up
+      // here with nothing left after stripping the date. Fall back to the
+      // header text accumulated from the previous line(s) in that case.
+      const headerText =
+        line.replace(INLINE_DATE_RE, "").trim().replace(/[-–,]\s*$/, "") || pendingHeader;
+      startEntry(headerText, inlineMatch[0].replace(/[()]/g, ""));
     } else if (STANDALONE_DATE_RE.test(line)) {
-      finishCurrent();
-      current = {
-        ...splitHeaderLine(pendingHeader),
-        project: "",
-        dates: line.trim(),
-        bullets: [],
-      };
-      pendingHeader = "";
+      startEntry(pendingHeader, line.trim());
     } else if (BULLET_RE.test(line)) {
       if (current) current.bullets.push(line.replace(BULLET_RE, "").trim());
     } else {
@@ -187,8 +205,29 @@ function parseSkills(lines) {
   return categories;
 }
 
+// A bullet whose sentence wraps across multiple print lines comes back from
+// PDF/DOCX text extraction as several separate lines, only the first of
+// which has the bullet marker. Once bullets are in use for this section, a
+// following line with no marker is a continuation of the previous bullet,
+// not a new one — otherwise "Delivered X using Python, FastAPI, Django, /
+// React, and AWS." becomes two bogus bullets. Sections with no bullet
+// markers at all (e.g. one-per-line Education/Certifications) are
+// unaffected: every line still becomes its own entry.
 function parseListSection(lines) {
-  return lines.map((l) => l.replace(BULLET_RE, "").trim()).filter(Boolean);
+  const items = [];
+  let usingBullets = false;
+  for (const rawLine of lines) {
+    const line = rawLine.trim();
+    if (BULLET_RE.test(line)) {
+      usingBullets = true;
+      items.push(line.replace(BULLET_RE, "").trim());
+    } else if (usingBullets && items.length) {
+      items[items.length - 1] = `${items[items.length - 1]} ${line}`.trim();
+    } else {
+      items.push(line);
+    }
+  }
+  return items.filter(Boolean);
 }
 
 function parseResumeText(text) {
