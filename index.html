@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Resume Builder CMT</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ccircle cx='50' cy='50' r='45' fill='%23111827'/%3E%3Ccircle cx='50' cy='50' r='45' fill='none' stroke='%23f97316' stroke-width='10'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <h1>Resume Builder <span>CMT</span></h1>
+    <p>Upload a resume, review the extracted details, and export it in the CMT theme. Runs entirely in your browser — nothing is uploaded to a server.</p>
+  </header>
+
+  <main class="container">
+    <section id="upload-section" class="card">
+      <h2>1. Upload resume</h2>
+      <p class="hint">Accepts PDF or DOCX.</p>
+      <input type="file" id="resume-file" accept=".pdf,.docx" />
+
+      <label class="checkbox-label">
+        <input type="checkbox" id="use-ai-parsing" />
+        Use AI parsing (Claude) for higher accuracy
+      </label>
+      <div id="ai-key-row" class="hidden">
+        <label>Anthropic API key</label>
+        <input type="password" id="ai-api-key" placeholder="sk-ant-..." autocomplete="off" />
+        <p class="field-note">Stored only in this browser's localStorage. Sent directly from your browser to Anthropic's API — never to any other server, and never committed to this repo.</p>
+      </div>
+
+      <button id="parse-btn" class="btn btn-primary">Parse Resume</button>
+      <p id="upload-status" class="status"></p>
+    </section>
+
+    <section id="review-section" class="card hidden">
+      <h2>2. Review &amp; edit</h2>
+      <p class="hint">Extraction is heuristic — fix anything that looks off before generating the PDF.</p>
+      <p class="hint redact-notice">Client-facing redaction is applied automatically: only the first name is shown, phone/email never appear, and employer names are dropped — only the role and project you enter per job are shown.</p>
+
+      <label>Name</label>
+      <input type="text" id="f-name" />
+      <p class="field-note">Only the first word is shown on the PDF.</p>
+
+      <label>Title / Role</label>
+      <input type="text" id="f-title" />
+
+      <label>Location</label>
+      <input type="text" id="f-location" />
+
+      <label>Phone <span class="field-note">(internal reference only — never shown on the PDF)</span></label>
+      <input type="text" id="f-phone" />
+
+      <label>Email <span class="field-note">(internal reference only — never shown on the PDF)</span></label>
+      <input type="text" id="f-email" />
+
+      <label>Executive Summary</label>
+      <textarea id="f-summary" rows="4"></textarea>
+
+      <label>Education (one per line)</label>
+      <textarea id="f-education" rows="2"></textarea>
+
+      <label>Certifications (one per line)</label>
+      <textarea id="f-certifications" rows="3"></textarea>
+
+      <label>Key Achievements (one per line)</label>
+      <textarea id="f-achievements" rows="3"></textarea>
+
+      <h3>Experience</h3>
+      <div id="experience-list"></div>
+      <button type="button" id="add-experience" class="btn btn-secondary">+ Add job</button>
+
+      <h3>Technical Skills</h3>
+      <div id="skills-list"></div>
+      <button type="button" id="add-skill" class="btn btn-secondary">+ Add category</button>
+
+      <div class="actions">
+        <button id="generate-btn" class="btn btn-primary">Generate CMT PDF</button>
+        <p id="generate-status" class="status"></p>
+      </div>
+    </section>
+  </main>
+
+  <template id="experience-template">
+    <div class="entry">
+      <button type="button" class="remove-btn">Remove</button>
+      <label>Role / Title <span class="field-note">(shown on PDF)</span></label>
+      <input type="text" class="exp-role" />
+      <label>Employer <span class="field-note">(internal reference only — never shown on the PDF)</span></label>
+      <input type="text" class="exp-employer" />
+      <label>Project Name <span class="field-note">(shown on PDF instead of the employer)</span></label>
+      <input type="text" class="exp-project" />
+      <label>Dates (e.g. "Mar 2025 – until now")</label>
+      <input type="text" class="exp-dates" />
+      <label>Bullets (one per line)</label>
+      <textarea class="exp-bullets" rows="3"></textarea>
+    </div>
+  </template>
+
+  <template id="skill-template">
+    <div class="entry">
+      <button type="button" class="remove-btn">Remove</button>
+      <label>Category</label>
+      <input type="text" class="skill-category" />
+      <label>Items</label>
+      <textarea class="skill-items" rows="2"></textarea>
+    </div>
+  </template>
+
+  <div id="resume-render-host" aria-hidden="true"></div>
+
+  <!-- PDF text extraction -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+  <!-- DOCX text extraction -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.8.0/mammoth.browser.min.js"></script>
+  <!-- Resume template rendering -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/handlebars.js/4.7.8/handlebars.min.js"></script>
+  <!-- Client-side HTML-to-PDF export -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.2/html2pdf.bundle.min.js"></script>
+
+  <script src="parser.js"></script>
+  <script src="ai-parser.js"></script>
+  <script src="resume-template.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

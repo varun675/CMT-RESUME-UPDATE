@@ -1,0 +1,285 @@
+:root {
+  --cmt-accent: #f97316;
+  --cmt-accent-dark: #c2410c;
+  --cmt-near-black: #111827;
+  --cmt-gray-bg: #f4f5f7;
+  --cmt-border: #e2e8f0;
+  --cmt-text: #1f2937;
+  --cmt-text-muted: #6b7280;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+  background: var(--cmt-gray-bg);
+  color: var(--cmt-text);
+}
+
+.topbar {
+  background: var(--cmt-near-black);
+  color: #fff;
+  padding: 24px 32px;
+  border-bottom: 4px solid var(--cmt-accent);
+}
+.topbar h1 { margin: 0 0 4px 0; font-size: 22px; }
+.topbar h1 span { color: var(--cmt-accent); }
+.topbar p { margin: 0; color: #cbd5e1; font-size: 13px; }
+
+.container {
+  max-width: 760px;
+  margin: 24px auto;
+  padding: 0 16px 60px;
+}
+
+.card {
+  background: #fff;
+  border: 1px solid var(--cmt-border);
+  border-radius: 8px;
+  padding: 20px 24px;
+  margin-bottom: 20px;
+}
+.hidden { display: none; }
+
+.card h2 {
+  font-size: 16px;
+  margin-top: 0;
+  border-bottom: 2px solid var(--cmt-accent);
+  padding-bottom: 6px;
+}
+.card h3 {
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+  color: var(--cmt-near-black);
+  margin: 20px 0 8px;
+}
+
+.hint { color: var(--cmt-text-muted); font-size: 12.5px; margin-top: -6px; }
+.redact-notice {
+  background: #fff7ed;
+  border: 1px solid #fed7aa;
+  color: var(--cmt-accent-dark);
+  padding: 8px 10px;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+.field-note { font-weight: 400; color: var(--cmt-text-muted); font-size: 11px; }
+
+label {
+  display: block;
+  font-size: 12.5px;
+  font-weight: 600;
+  margin: 12px 0 4px;
+  color: var(--cmt-near-black);
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--cmt-text);
+  margin: 12px 0 4px;
+}
+.checkbox-label input[type="checkbox"] { width: auto; margin: 0; }
+
+input[type="text"], input[type="password"], input[type="file"], textarea {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--cmt-border);
+  border-radius: 5px;
+  font-size: 13px;
+  font-family: inherit;
+}
+textarea { resize: vertical; }
+
+.btn {
+  display: inline-block;
+  margin-top: 14px;
+  padding: 9px 18px;
+  border: none;
+  border-radius: 5px;
+  font-size: 13.5px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.btn-primary { background: var(--cmt-accent); color: #fff; }
+.btn-primary:hover { background: var(--cmt-accent-dark); }
+.btn-secondary { background: #eef2f6; color: var(--cmt-near-black); }
+.btn-secondary:hover { background: #e2e8f0; }
+
+.status { font-size: 12.5px; color: var(--cmt-text-muted); margin-top: 10px; }
+.status.error { color: #b91c1c; }
+.status.success { color: var(--cmt-accent-dark); }
+
+.entry {
+  position: relative;
+  border: 1px solid var(--cmt-border);
+  border-radius: 6px;
+  padding: 12px 12px 6px;
+  margin-bottom: 12px;
+  background: #fafbfc;
+}
+.remove-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: #b91c1c;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.actions { margin-top: 20px; border-top: 1px solid var(--cmt-border); padding-top: 16px; }
+
+/* ---------------------------------------------------------------------- */
+/* Resume document preview/export — scoped under .resume-doc so it never  */
+/* leaks into (or is overridden by) the app UI styles above, since both   */
+/* live in the same page for client-side html2pdf rendering.              */
+/* ---------------------------------------------------------------------- */
+.resume-doc {
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
+  color: var(--cmt-text);
+  font-size: 11px;
+  line-height: 1.45;
+  background: #ffffff;
+}
+.resume-doc .bar {
+  height: 10px;
+  background: var(--cmt-accent);
+}
+.resume-doc .page {
+  display: table;
+  width: 100%;
+  table-layout: fixed;
+}
+.resume-doc .sidebar {
+  display: table-cell;
+  width: 32%;
+  background: var(--cmt-gray-bg);
+  padding: 24px 18px;
+  vertical-align: top;
+}
+.resume-doc .main {
+  display: table-cell;
+  width: 68%;
+  padding: 24px 22px;
+  background: #ffffff;
+  vertical-align: top;
+}
+.resume-doc .avatar {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  background: var(--cmt-near-black);
+  border: 5px solid var(--cmt-accent);
+  margin-bottom: 12px;
+}
+.resume-doc .logo {
+  max-width: 150px;
+  max-height: 48px;
+  margin-bottom: 18px;
+}
+.resume-doc .name {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  color: var(--cmt-near-black);
+  margin: 0 0 2px 0;
+}
+.resume-doc .role {
+  font-size: 11px;
+  color: var(--cmt-text-muted);
+  margin: 0 0 6px 0;
+}
+.resume-doc .contact {
+  font-size: 10px;
+  color: var(--cmt-text-muted);
+  margin: 0 0 18px 0;
+}
+.resume-doc .sidebar h2, .resume-doc .main h2 {
+  font-size: 12px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--cmt-near-black);
+  border-bottom: 2px solid var(--cmt-accent);
+  padding-bottom: 4px;
+  margin: 18px 0 8px 0;
+}
+.resume-doc .sidebar h2:first-of-type { margin-top: 0; }
+.resume-doc .summary-text { margin: 0; color: var(--cmt-text); }
+.resume-doc .list { margin: 0; padding-left: 16px; }
+.resume-doc .list li { margin-bottom: 6px; }
+.resume-doc .job {
+  margin-bottom: 16px;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+.resume-doc .job-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-weight: 700;
+  color: var(--cmt-near-black);
+  font-size: 12px;
+}
+.resume-doc .job-dates {
+  font-weight: 600;
+  color: var(--cmt-accent-dark);
+  font-size: 10.5px;
+  white-space: nowrap;
+}
+.resume-doc .job ul {
+  margin: 6px 0 0 0;
+  padding-left: 16px;
+}
+.resume-doc .job li { margin-bottom: 4px; }
+.resume-doc .skills-section {
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+.resume-doc .skills-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+  margin-top: 8px;
+}
+.resume-doc .skill-cell {
+  border: 1px solid var(--cmt-border);
+  border-radius: 4px;
+  overflow: hidden;
+  page-break-inside: avoid;
+  break-inside: avoid;
+}
+.resume-doc .skill-label {
+  background: var(--cmt-near-black);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  padding: 5px 8px;
+}
+.resume-doc .skill-items {
+  padding: 6px 8px;
+  color: var(--cmt-text);
+}
+
+/* Host for the resume while html2pdf captures it. Deliberately plain,
+   normal-flow block — no position:fixed/absolute and no height:0/overflow
+   tricks. html2canvas's cloning relies on the page's real scrollable layout
+   to size its capture; anything that visually hides content without it
+   contributing to that layout (fixed positioning far off-screen, zero-height
+   containers with overflow:visible, visibility:hidden) has produced a
+   blank capture in testing — worse, only when triggered by an actual click
+   (which auto-scrolls), not a direct script call, making it easy to miss.
+   Sitting in normal flow avoids all of that, at the cost of a brief,
+   harmless flash of the resume appearing below the form during export. */
+#resume-render-host {
+  width: 794px; /* A4 width at 96dpi */
+}
